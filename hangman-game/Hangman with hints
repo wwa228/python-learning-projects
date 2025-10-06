@@ -1,0 +1,126 @@
+# This game seeks to provide hints to inform the user IF he/she is getting close to the answer
+import random
+import string
+
+WORDLIST_FILENAME = "words.txt"
+
+
+def load_words():
+    """
+    Returns a list of valid words. Words are strings of lowercase letters.
+
+    Depending on the size of the word list, this function may
+    take a while to finish.
+    """
+    print("Loading word list from file...")
+    # inFile: file
+    inFile = open(WORDLIST_FILENAME, 'r')
+    # line: string
+    line = inFile.readline()
+    # wordlist: list of strings
+    wordlist = line.split()
+    print("  ", len(wordlist), "words loaded.")
+    return wordlist
+
+
+def choose_word(wordlist):
+    """
+    wordlist (list): list of words (strings)
+
+    Returns a word from wordlist at random
+    """
+    return random.choice(wordlist)
+
+wordlist = load_words()
+
+global guessed_word
+global available_letters
+global secret_word
+def word_guessed(secret_word, letters_guessed):
+    for letter in secret_word:
+        if letter not in letters_guessed:
+            return False
+    return True
+def get_guessed_word(secret_word, letters_guessed):
+
+    guessed_word = ""
+    for letter in secret_word:
+        if letter in letters_guessed:
+            guessed_word += letter
+        else:
+            guessed_word += "_"
+    return guessed_word
+
+def get_available_letters(letters_guessed):
+    available_letters = string.ascii_uppercase
+    for letter in letters_guessed:
+        available_letters = available_letters.replace(letter, "")
+
+    return available_letters
+
+
+def hangman(secret_word):
+    wordlist = load_words()
+    warnings = 3
+    number_of_guesses = 6
+    letters_guessed = ""
+    secret_word = choose_word(wordlist)
+
+    letters_guessed = "_"
+    number_of_guesses = 6
+    warnings = 3
+    print("Welcome to hangman ")
+    print(f" I have a word {len(secret_word)} letters long")
+
+    print("..............................................")
+    unique_letters = len(set(secret_word))
+    while number_of_guesses > 0 and warnings > 1:
+
+        print("Available letters are :", get_available_letters(letters_guessed))
+        print(f"you have {warnings} warnings left")
+        print(f"you have {number_of_guesses} guesses left ")
+        guessed_word = (input("Please guess a letter ")).upper().strip()
+
+        if not guessed_word.isalpha():
+            print("The letter you've guessed is not in available letters")
+            continue
+        elif guessed_word in letters_guessed:
+            print("good , you are getting there ")
+
+        elif len(guessed_word) > 1:
+            print("you can only input one letter at a time ")
+            warnings -= 1
+        else:
+            letters_guessed += guessed_word
+            if guessed_word in secret_word:
+                print("good guess")
+
+            else:
+                print("try again")
+                if guessed_word in "aeiuo":
+                    number_of_guesses -= 2
+                else:
+                    number_of_guesses -= 1
+
+        print("Guessed word:", get_guessed_word(secret_word, letters_guessed))
+        print("...............................")
+
+        if word_guessed(secret_word, letters_guessed):
+            print("congrats you had it right ")
+            print(f"your score is{unique_letters*number_of_guesses}")
+            break
+    if not word_guessed(secret_word, letters_guessed):
+        print(f"Sorry, you ran out of guesses. The word was '{secret_word}'.")
+
+def match_with_gaps(my_word, other_word):
+    my_word = my_word.replace(" ","")
+    if len(my_word) != len(other_word):
+        return False
+    for i in range(len(my_word)):
+       if my_word[i] != "_" and my_word[i] != other_word[i]:
+          return False
+    return True
+
+secret_word = choose_word(wordlist)
+hangman(secret_word)
+
